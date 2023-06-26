@@ -4,9 +4,15 @@ from authentication.models import User
 
 
 class Project:
+    BACKEND = "B"
+    FRONTEND = "F"
+    IOS = "I"
+    ANDROID = "A"
+
+    TYPE = [(BACKEND, "Back-end"), (FRONTEND, "Front-end"), (IOS, "IOS"), (ANDROID, "Android")]
     title = models.CharField(max_length=128)
     description = models.CharField(max_length=2048)
-    type = models.CharField(max_length=128)
+    type = models.CharField(max_length=2, choices=TYPE, default=BACKEND)
     author_user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     staff = models.ForeignKey(User, through="Contributors")
     time_created = models.DateTimeField(auto_now_add=True)
@@ -24,12 +30,27 @@ class Contributors:
 
 
 class Issues:
+    FAIBLE = "F"
+    MOYENNE = "M"
+    ELEVEE = "E"
+    PRIORITY = [(FAIBLE, "Faible"), (MOYENNE, "Moyenne"), (ELEVEE, "Elevée")]
+
+    BUG = "B"
+    AMELIARATION = "A"
+    TACHE = "T"
+    BALISE = [(BUG, "Bug"), (AMELIARATION, "Amélioration"), (TACHE, "Tâche")]
+
+    A_FAIRE = "A"
+    EN_COURS = "E"
+    TERMINE = "T"
+    STATUS = [(A_FAIRE, "A  faire"), (EN_COURS, "En cours"), (TERMINE, "Terminé")]
+
     title = models.CharField(max_length=120)
     description = models.CharField(max_length=2048)
-    tag = models.CharField(max_length=120)
-    prority = models.CharField(max_length=50)
+    tag = models.CharField(max_length=2, choices=BALISE, default=BUG)
+    prority = models.CharField(max_length=2, choices=PRIORITY, default=ELEVEE)
     project_id = models.IntegerField()
-    status = models.CharField(max_length=50)
+    status = models.CharField(max_length=2, choices=STATUS, default=A_FAIRE)
     author_user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     assignee_user_id = author_user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     time_created = models.DateTimeField(auto_now_add=True)
