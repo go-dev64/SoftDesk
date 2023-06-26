@@ -1,6 +1,5 @@
 from django.db import models
-
-from authentication.models import User
+from django.conf import settings
 
 
 class Project:
@@ -10,11 +9,12 @@ class Project:
     ANDROID = "A"
 
     TYPE = [(BACKEND, "Back-end"), (FRONTEND, "Front-end"), (IOS, "IOS"), (ANDROID, "Android")]
+
     title = models.CharField(max_length=128)
     description = models.CharField(max_length=2048)
     type = models.CharField(max_length=2, choices=TYPE, default=BACKEND)
-    author_user_id = models.ForeignKey(User, on_delete=models.CASCADE)
-    staff = models.ForeignKey(User, through="Contributors")
+    author_user_id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    staff = models.ForeignKey(settings.AUTH_USER_MODEL, through="Contributors", on_delete=models.CASCADE)
     time_created = models.DateTimeField(auto_now_add=True)
 
 
@@ -23,7 +23,7 @@ class Contributors:
     COLLABORATEUR = "C"
     ROLE = [(REPONSABLE, "Responsable"), (COLLABORATEUR, "Collaborateur")]
 
-    user_id = models.IntegerField(User, on_delete=models.CASCADE)
+    user_id = models.IntegerField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     project_id = models.IntegerField(Project, on_delete=models.CASCADE)
     permission = models.ChoiceField()
     role = models.CharField(max_length=1, choices=ROLE, default=COLLABORATEUR)
@@ -51,13 +51,13 @@ class Issues:
     prority = models.CharField(max_length=2, choices=PRIORITY, default=ELEVEE)
     project_id = models.IntegerField()
     status = models.CharField(max_length=2, choices=STATUS, default=A_FAIRE)
-    author_user_id = models.ForeignKey(User, on_delete=models.CASCADE)
-    assignee_user_id = author_user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    author_user_id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    assignee_user_id = author_user_id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     time_created = models.DateTimeField(auto_now_add=True)
 
 
 class Comments:
     description = models.CharField(max_length=2048)
-    author_user_id = models.ForeignKey(User, on_delete=models.CASCADE)
+    author_user_id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     issue_id = project_id = models.IntegerField()
     time_created = models.DateTimeField(auto_now_add=True)
