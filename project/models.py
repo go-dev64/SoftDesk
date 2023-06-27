@@ -31,9 +31,9 @@ class Contributors(models.Model):
     ROLE = [(REPONSABLE, "Responsable"), (COLLABORATEUR, "Collaborateur")]
 
     # user_id = models.IntegerField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    users = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    users_id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     # project_id = models.IntegerField(Project, on_delete=models.CASCADE)
-    projects = models.ForeignKey(Project, on_delete=models.CASCADE)
+    projects_id = models.ForeignKey(Project, on_delete=models.CASCADE)
     permission = models.CharField(max_length=1)
     role = models.CharField(max_length=1, choices=ROLE, default=COLLABORATEUR)
 
@@ -62,8 +62,10 @@ class Issues(models.Model):
     # project_id = models.IntegerField()
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     status = models.CharField(max_length=2, choices=STATUS, default=A_FAIRE)
-    issue_author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="issues_written")
-    issue_assignee_user = models.ForeignKey(
+    author_user_id = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="issues_written"
+    )
+    assignee_user_id = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="assigned_issues"
     )
     time_created = models.DateTimeField(auto_now_add=True)
@@ -74,6 +76,6 @@ class Issues(models.Model):
 
 class Comments(models.Model):
     description = models.CharField(max_length=2048)
-    comment_author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    author_user_id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     issue_id = models.ForeignKey(Issues, on_delete=models.CASCADE)
     time_created = models.DateTimeField(auto_now_add=True)
