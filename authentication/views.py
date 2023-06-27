@@ -1,15 +1,16 @@
 from django.shortcuts import render
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ModelViewSet, ViewSet
 from .serializers import UserSerializer
 from rest_framework.response import Response
 
 from .serializers import UserSerializer
+from .models import User
 
 
-class CreateUserView(ModelViewSet):
+class CreateUserView(ViewSet):
     serializer_class = UserSerializer
 
-    def post_queryset(self, request):
+    def create(self, request):
         serializer = UserSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
