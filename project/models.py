@@ -60,7 +60,8 @@ class Issues(models.Model):
     prority = models.CharField(max_length=2, choices=PRIORITY, default=ELEVEE)
 
     # project_id = models.IntegerField()
-    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="issues")
+
     status = models.CharField(max_length=2, choices=STATUS, default=A_FAIRE)
     author_user_id = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="issues_written"
@@ -77,5 +78,5 @@ class Issues(models.Model):
 class Comments(models.Model):
     description = models.CharField(max_length=2048)
     author_user_id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    issue_id = models.ForeignKey(Issues, on_delete=models.CASCADE)
+    issue_id = models.ForeignKey(Issues, on_delete=models.CASCADE, related_name="comments")
     time_created = models.DateTimeField(auto_now_add=True)

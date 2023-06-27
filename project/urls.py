@@ -6,6 +6,6 @@ from .views import ProjectViewset
 
 router = routers.SimpleRouter()
 
-router.register("project", ProjectViewset, basename="project")
+router.register("projects", ProjectViewset, basename="projects")
 
-urlpatterns = [path("api/", include(router.urls))]
+urlpatterns = [path("", include(router.urls))]
