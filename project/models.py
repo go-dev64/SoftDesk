@@ -16,9 +16,6 @@ class Project(models.Model):
     author_user_id = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="authored_projects"
     )
-    staff = models.ManyToManyField(
-        settings.AUTH_USER_MODEL, through="Contributors", related_name="contributed_projects"
-    )
     time_created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:
