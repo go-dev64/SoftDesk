@@ -2,13 +2,15 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from rest_framework.response import Response
 from rest_framework import status
+from django.db.models import Q
 
 from .models import Project
-from .serialisers import ProjectSerializer
+from .serialisers import ProjectListSerializer, ProjectDetailSerializer
 
 
 class ProjectViewset(ModelViewSet):
-    serializer_class = ProjectSerializer
+    serializer_class = ProjectListSerializer
+    detail_serializer_class = ProjectDetailSerializer
     # permission_classes = [IsAuthenticated]
 
     """def create(self, request, *args, **kwargs):
@@ -25,4 +27,17 @@ class ProjectViewset(ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def get_queryset(self):
-        return Project.objects.all()
+        """return les projet dans les quels user a participé
+
+        Returns:
+            _type_: _description_
+        """
+        if self.request.user.is_superuser:
+            return Project.objects.all()
+        else:
+            return Project.objects.filter(Q(author_user_id=self.request.user))
+
+    def get_serializer_class(self):
+        if self.action == "retrieve":
+            return self.detail_serializer_class
+        return super().get_serializer_class()

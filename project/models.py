@@ -28,7 +28,7 @@ class Contributors(models.Model):
     ROLE = [(REPONSABLE, "Responsable"), (COLLABORATEUR, "Collaborateur")]
 
     # user_id = models.IntegerField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    users_id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    users_id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="staff")
     # project_id = models.IntegerField(Project, on_delete=models.CASCADE)
     projects_id = models.ForeignKey(Project, on_delete=models.CASCADE)
     permission = models.CharField(max_length=1)
