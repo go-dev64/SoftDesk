@@ -15,16 +15,19 @@ class ProjectViewset(ModelViewSet):
 
     """def create(self, request, *args, **kwargs):
         request.POST._mutable = True
-        request.data["author_user_id"] = request.user
+        request.data["author_user_id"] = request.user.pk
         request.POST._mutable = False
         print(request.data)
         return super(ProjectViewset, self).create(request, *args, **kwargs)"""
 
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
+        serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save(author_user_id=request.user)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def edit(self, request, *args, **kwargs):
+        pass
 
     def get_queryset(self):
         """return les projet dans les quels user a participé
@@ -35,7 +38,8 @@ class ProjectViewset(ModelViewSet):
         if self.request.user.is_superuser:
             return Project.objects.all()
         else:
-            return Project.objects.filter(Q(author_user_id=self.request.user))
+            # return Project.objects.filter(Q(author_user_id=self.request.user) |)
+            return Project.objects.filter(author_user_id=self.request.user)
 
     def get_serializer_class(self):
         if self.action == "retrieve":

@@ -14,7 +14,7 @@ class Project(models.Model):
     description = models.CharField(max_length=2048)
     type = models.CharField(max_length=2, choices=TYPE, default=BACKEND)
     author_user_id = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="authored_projects"
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, related_name="authored_projects"
     )
     time_created = models.DateTimeField(auto_now_add=True)
 
@@ -28,7 +28,7 @@ class Contributors(models.Model):
     ROLE = [(REPONSABLE, "Responsable"), (COLLABORATEUR, "Collaborateur")]
 
     # user_id = models.IntegerField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    users_id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="staff")
+    users_id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     # project_id = models.IntegerField(Project, on_delete=models.CASCADE)
     projects_id = models.ForeignKey(Project, on_delete=models.CASCADE)
     permission = models.CharField(max_length=1)
