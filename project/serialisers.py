@@ -11,7 +11,7 @@ class ProjectListSerializer(ModelSerializer):
     def validate_title(self, value):
         # Nous vérifions que la projet existe
         if Project.objects.filter(title=value).exists():
-            raise ValidationError("Category already exists")
+            raise ValidationError("Project already exists")
         return value
 
 

@@ -26,9 +26,6 @@ class ProjectViewset(ModelViewSet):
         serializer.save(author_user_id=request.user)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def edit(self, request, *args, **kwargs):
-        pass
-
     def get_queryset(self):
         """return les projet dans les quels user a participé
 
