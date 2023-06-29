@@ -5,13 +5,20 @@ from rest_framework import status
 from django.db.models import Q
 
 from .models import Project
-from .serialisers import ProjectListSerializer, ProjectDetailSerializer
+from .serialisers import (
+    CommentsDetailSerializer,
+    CommentsListSerializer,
+    IssuesDetailSerializer,
+    IssuesListSerializer,
+    ProjectDetailSerializer,
+    ProjectListSerializer,
+)
 
 
 class ProjectViewset(ModelViewSet):
     serializer_class = ProjectListSerializer
     detail_serializer_class = ProjectDetailSerializer
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     """def create(self, request, *args, **kwargs):
         request.POST._mutable = True
@@ -27,7 +34,7 @@ class ProjectViewset(ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def get_queryset(self):
-        """return les projet dans les quels user a participé
+        """return les projes dans lesquels user a participé
 
         Returns:
             _type_: _description_
@@ -42,3 +49,36 @@ class ProjectViewset(ModelViewSet):
         if self.action == "retrieve":
             return self.detail_serializer_class
         return super().get_serializer_class()
+
+
+class IssuesView(ModelViewSet):
+    """_summary_
+
+    Args:
+        ModelViewSet (_type_): _description_
+    """
+
+    serializer_class = IssuesListSerializer
+    detail_serializer_class = IssuesDetailSerializer
+    permission_classes = [IsAuthenticated]
+    pass
+
+
+class CommentsViews(ModelViewSet):
+    """_summary_
+
+    Args:
+        ModelViewSet (_type_): _description_
+    """
+
+    pass
+
+
+class UserViews(ModelViewSet):
+    """_summary_
+
+    Args:
+        ModelViewSet (_type_): _description_
+    """
+
+    pass
