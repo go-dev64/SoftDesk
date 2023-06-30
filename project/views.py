@@ -4,10 +4,13 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.db.models import Q
 
-from .models import Project
+import project
+
+from .models import Contributors, Issues, Project
 from .serialisers import (
     CommentsDetailSerializer,
     CommentsListSerializer,
+    ContributorSerializer,
     IssuesDetailSerializer,
     IssuesListSerializer,
     ProjectDetailSerializer,
@@ -42,8 +45,10 @@ class ProjectViewset(ModelViewSet):
         if self.request.user.is_superuser:
             return Project.objects.all()
         else:
-            # return Project.objects.filter(Q(author_user_id=self.request.user) |)
-            return Project.objects.filter(author_user_id=self.request.user)
+            # return Project.objects.filter(Q(author_user_id=self.request.user) | Q)
+            return Project.objects.filter(
+                Q(author_user_id=self.request.user) | Q(contributors=self.request.user.pk)
+            ).order_by("-time_created")
 
     def get_serializer_class(self):
         if self.action == "retrieve":
@@ -60,8 +65,23 @@ class IssuesView(ModelViewSet):
 
     serializer_class = IssuesListSerializer
     detail_serializer_class = IssuesDetailSerializer
-    permission_classes = [IsAuthenticated]
-    pass
+
+    def create(self, request, *args, **kwargs):
+        project_id = self.kwargs["project_pk"]
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.project = project_id
+        # assingnee_user =
+        serializer.save(author_user_id=request.user)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def get_queryset(self):
+        return Issues.objects.filter(project=self.kwargs["project_pk"])
+
+    def get_serializer_class(self):
+        if self.action == "retrieve":
+            return self.detail_serializer_class
+        return super().get_serializer_class()
 
 
 class CommentsViews(ModelViewSet):
@@ -81,4 +101,19 @@ class UserViews(ModelViewSet):
         ModelViewSet (_type_): _description_
     """
 
-    pass
+    serializer_class = ContributorSerializer
+    detail_serializer_class = ProjectDetailSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Contributors.objects.filter(project=self.kwargs["project_pk"])
+
+    def create(self, request, *args, **kwargs):
+        project = Project.objects.get(self.kwargs["project_pk"])
+        """if project.author_user_id is not request.user:
+            raise ValueError("Vous n'etes pas le responsable du projet. Ajout de collaborateur impossible.")"""
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.project_id = project
+        serializer.save()
+        return super().create(request, *args, **kwargs)

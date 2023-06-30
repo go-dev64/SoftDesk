@@ -1,9 +1,14 @@
 from rest_framework.serializers import ModelSerializer, ValidationError, SerializerMethodField
 
-from authentication import serializers
+from authentication.models import User
 
-from .models import Comments, Issues, Project
-from authentication.serializers import UserSerializer
+from .models import Comments, Contributors, Issues, Project
+
+
+class ContributorSerializer(ModelSerializer):
+    class Meta:
+        model = Contributors
+        fields = ["user_id", "permission", "role"]
 
 
 class ProjectListSerializer(ModelSerializer):
@@ -19,19 +24,16 @@ class ProjectListSerializer(ModelSerializer):
 
 
 class ProjectDetailSerializer(ModelSerializer):
-    staff = SerializerMethodField()
-
-    def get_staff(self, instance):
-        queryset = instance.contributors_set.all()
-        serializer = UserSerializer(queryset, many=True)
-        return serializer.data
+    contributors = ContributorSerializer(source="contributors_set", many=True)
 
     class Meta:
         model = Project
-        fields = ["id", "title", "type", "description", "author_user_id", "staff", "time_created"]
+        fields = ["id", "title", "type", "description", "author_user_id", "contributors", "time_created"]
 
 
 class CommentsListSerializer(ModelSerializer):
+    project = SerializerMethodField()
+
     class Meta:
         model = Comments
         fields = ["id", "author_user_id", "description", "issues_id"]
@@ -46,7 +48,7 @@ class CommentsDetailSerializer(ModelSerializer):
 class IssuesListSerializer(ModelSerializer):
     class Meta:
         model = Issues
-        fields = ["id", "title", "tag", "priority", "project_id", "status"]
+        fields = ["id", "title", "tag", "priority", "project_id", "author_user_id", "status"]
 
 
 class IssuesDetailSerializer(ModelSerializer):
