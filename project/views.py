@@ -3,6 +3,7 @@ from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 from rest_framework.response import Response
 from rest_framework import status
 from django.db.models import Q
+from authentication.models import User
 
 import project
 
@@ -56,6 +57,30 @@ class ProjectViewset(ModelViewSet):
         return super().get_serializer_class()
 
 
+class UserViews(ModelViewSet):
+    """_summary_
+
+    Args:
+        ModelViewSet (_type_): _description_
+    """
+
+    serializer_class = ContributorSerializer
+    # permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        project = Project.objects.get(id=self.kwargs["project_pk"])
+        return Contributors.objects.filter(project_id=project.pk)
+
+    def create(self, request, *args, **kwargs):
+        request.POST._mutable = True
+        print(request.data)
+        request.data["project_id"] = self.kwargs["project_pk"]
+        print(request.data)
+        request.POST._mutable = False
+        print(request.data)
+        return super(UserViews, self).create(request, *args, **kwargs)
+
+
 class IssuesView(ModelViewSet):
     """_summary_
 
@@ -92,28 +117,3 @@ class CommentsViews(ModelViewSet):
     """
 
     pass
-
-
-class UserViews(ModelViewSet):
-    """_summary_
-
-    Args:
-        ModelViewSet (_type_): _description_
-    """
-
-    serializer_class = ContributorSerializer
-    detail_serializer_class = ProjectDetailSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        return Contributors.objects.filter(project=self.kwargs["project_pk"])
-
-    def create(self, request, *args, **kwargs):
-        project = Project.objects.get(self.kwargs["project_pk"])
-        """if project.author_user_id is not request.user:
-            raise ValueError("Vous n'etes pas le responsable du projet. Ajout de collaborateur impossible.")"""
-        serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.project_id = project
-        serializer.save()
-        return super().create(request, *args, **kwargs)

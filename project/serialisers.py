@@ -1,4 +1,4 @@
-from rest_framework.serializers import ModelSerializer, ValidationError, SerializerMethodField
+from rest_framework.serializers import ModelSerializer, ValidationError, SerializerMethodField, PrimaryKeyRelatedField
 
 from authentication.models import User
 
@@ -18,11 +18,29 @@ class ContributorSerializer(ModelSerializer):
         ModelSerializer (_type_): _description_
     """
 
-    user_id = ProfileUserSerializer()
+    user_id = SerializerMethodField()
+    project_id = PrimaryKeyRelatedField(queryset=Project.objects.all())
 
     class Meta:
         model = Contributors
-        fields = ["user_id", "permission", "role"]
+        fields = ["user_id", "permission", "role", "project_id"]
+
+    def get_user_id(self, instance):
+        user = instance.user_id
+        serializer = ProfileUserSerializer(user)
+        return serializer.data
+
+    def create(self, validated_data):
+        user_data = validated_data.pop("user_id")
+        user = User.objects.get(id=user_data["id"])
+        permission = validated_data.get("permission")
+        role = validated_data.get("role")
+        project_id = validated_data.get("project_id")
+
+        contributor = Contributors.objects.create(
+            user=ProfileUserSerializer(user), permission=permission, role=role, project_id=project_id
+        )
+        return contributor
 
 
 class ProjectListSerializer(ModelSerializer):
