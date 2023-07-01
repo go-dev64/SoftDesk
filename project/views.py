@@ -43,12 +43,12 @@ class ProjectViewset(ModelViewSet):
             _type_: _description_
         """
         if self.request.user.is_superuser:
-            return Project.objects.all()
+            return Project.objects.all().order_by("title")
         else:
             # return Project.objects.filter(Q(author_user_id=self.request.user) | Q)
             return Project.objects.filter(
                 Q(author_user_id=self.request.user) | Q(contributors=self.request.user.pk)
-            ).order_by("-time_created")
+            ).order_by("title")
 
     def get_serializer_class(self):
         if self.action == "retrieve":

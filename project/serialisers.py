@@ -5,13 +5,29 @@ from authentication.models import User
 from .models import Comments, Contributors, Issues, Project
 
 
+class ProfileUserSerializer(ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["id", "first_name", "last_name"]
+
+
 class ContributorSerializer(ModelSerializer):
+    """Serilaizer of contributor
+
+    Args:
+        ModelSerializer (_type_): _description_
+    """
+
+    user_id = ProfileUserSerializer()
+
     class Meta:
         model = Contributors
         fields = ["user_id", "permission", "role"]
 
 
 class ProjectListSerializer(ModelSerializer):
+    author_user_id = ProfileUserSerializer()
+
     class Meta:
         model = Project
         fields = ["id", "title", "type", "author_user_id", "time_created"]
@@ -25,6 +41,7 @@ class ProjectListSerializer(ModelSerializer):
 
 class ProjectDetailSerializer(ModelSerializer):
     contributors = ContributorSerializer(source="contributors_set", many=True)
+    author_user_id = ProfileUserSerializer()
 
     class Meta:
         model = Project
@@ -33,6 +50,7 @@ class ProjectDetailSerializer(ModelSerializer):
 
 class CommentsListSerializer(ModelSerializer):
     project = SerializerMethodField()
+    author_user_id = ProfileUserSerializer()
 
     class Meta:
         model = Comments
@@ -46,6 +64,8 @@ class CommentsDetailSerializer(ModelSerializer):
 
 
 class IssuesListSerializer(ModelSerializer):
+    author_user_id = ProfileUserSerializer()
+
     class Meta:
         model = Issues
         fields = ["id", "title", "tag", "priority", "project_id", "author_user_id", "status"]
