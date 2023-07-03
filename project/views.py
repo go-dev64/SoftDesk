@@ -24,24 +24,11 @@ class ProjectViewset(ModelViewSet):
     detail_serializer_class = ProjectDetailSerializer
     permission_classes = [IsAuthenticated]
 
-    """def create(self, request, *args, **kwargs):
-        request.POST._mutable = True
-        request.data["author_user_id"] = self.request.user.id
-        request.POST._mutable = False
-        return super(ProjectViewset, self).create(request, *args, **kwargs)
-        erreur :  "author_user_id": [
-        "This field is required."
-    ]
-        """
-
     def create(self, request, *args, **kwargs):
         request.POST._mutable = True
         request.data["author_user_id"] = self.request.user.id
         request.POST._mutable = False
-        serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return super(ProjectViewset, self).create(request, *args, **kwargs)
 
     def get_queryset(self):
         """return les projes dans lesquels user a participé
@@ -73,26 +60,15 @@ class UserViews(ModelViewSet):
     serializer_class = ContributorSerializer
     # permission_classes = [IsAuthenticated]
 
-    def get_queryset(self):
-        project = Project.objects.get(id=self.kwargs["project_pk"])
-        return Contributors.objects.filter(project_id=project.pk)
-
     def create(self, request, *args, **kwargs):
         request.POST._mutable = True
         request.data["project_id"] = self.kwargs["project_pk"]
         request.POST._mutable = False
         return super(UserViews, self).create(request, *args, **kwargs)
 
-    def destroy(self, request, *args, **kwargs):
-        user = Contributors.objects.filter(
-            Q(project_id=self.kwargs["project_pk"]) & Q(user_id=self.kwargs["user_pk"])
-        ).first()
-
-        if user:
-            return super().destroy(request, *args, **kwargs)
-        else:
-            # Gérer le cas où le contributeur n'est pas trouvé ou n'est pas associé au projet
-            return Response(status=status.HTTP_404_NOT_FOUND)
+    def get_queryset(self):
+        project = Project.objects.get(id=self.kwargs["project_pk"])
+        return Contributors.objects.filter(project_id=project.pk).order_by("id")
 
 
 class IssuesView(ModelViewSet):
