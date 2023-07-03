@@ -8,7 +8,7 @@ from rest_framework import routers
 
 from .views import CreateUserView
 
-router = routers.SimpleRouter()
+router = routers.DefaultRouter()
 
 router.register("signup", CreateUserView, basename="signup")
 

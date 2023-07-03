@@ -26,15 +26,21 @@ class ProjectViewset(ModelViewSet):
 
     """def create(self, request, *args, **kwargs):
         request.POST._mutable = True
-        request.data["author_user_id"] = request.user.pk
+        request.data["author_user_id"] = self.request.user.id
         request.POST._mutable = False
-        print(request.data)
-        return super(ProjectViewset, self).create(request, *args, **kwargs)"""
+        return super(ProjectViewset, self).create(request, *args, **kwargs)
+        erreur :  "author_user_id": [
+        "This field is required."
+    ]
+        """
 
     def create(self, request, *args, **kwargs):
+        request.POST._mutable = True
+        request.data["author_user_id"] = self.request.user.id
+        request.POST._mutable = False
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save(author_user_id=request.user)
+        serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def get_queryset(self):
@@ -73,12 +79,20 @@ class UserViews(ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         request.POST._mutable = True
-        print(request.data)
         request.data["project_id"] = self.kwargs["project_pk"]
-        print(request.data)
         request.POST._mutable = False
-        print(request.data)
         return super(UserViews, self).create(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        user = Contributors.objects.filter(
+            Q(project_id=self.kwargs["project_pk"]) & Q(user_id=self.kwargs["user_pk"])
+        ).first()
+
+        if user:
+            return super().destroy(request, *args, **kwargs)
+        else:
+            # Gérer le cas où le contributeur n'est pas trouvé ou n'est pas associé au projet
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
 
 class IssuesView(ModelViewSet):
