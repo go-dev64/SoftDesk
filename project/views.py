@@ -1,13 +1,9 @@
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
-from rest_framework.response import Response
-from rest_framework import status
+from rest_framework.viewsets import ModelViewSet
 from django.db.models import Q
-from authentication.models import User
 
-import project
 
-from .models import Contributors, Issues, Project
+from .models import Comments, Contributors, Issues, Project
 from .serialisers import (
     CommentsDetailSerializer,
     CommentsListSerializer,
@@ -39,7 +35,6 @@ class ProjectViewset(ModelViewSet):
         if self.request.user.is_superuser:
             return Project.objects.all().order_by("title")
         else:
-            # return Project.objects.filter(Q(author_user_id=self.request.user) | Q)
             return Project.objects.filter(
                 Q(author_user_id=self.request.user) | Q(contributors=self.request.user.pk)
             ).order_by("title")
@@ -106,4 +101,21 @@ class CommentsViews(ModelViewSet):
         ModelViewSet (_type_): _description_
     """
 
-    pass
+    serializer_class = CommentsListSerializer
+    detail_serializer_class = CommentsDetailSerializer
+    permission_classes = [IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        request.POST._mutable = True
+        request.data["author_user_id"] = str(self.request.user.pk)
+        request.data["issue_id"] = self.kwargs["issue_pk"]
+        request.POST._mutable = False
+        return super(CommentsViews, self).create(request, *args, **kwargs)
+
+    def get_queryset(self):
+        return Comments.objects.filter(issue_id=self.kwargs["issue_pk"])
+
+    def get_serializer_class(self):
+        if self.action == "retrieve":
+            return self.detail_serializer_class
+        return super().get_serializer_class()

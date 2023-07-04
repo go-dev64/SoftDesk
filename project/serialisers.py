@@ -1,6 +1,4 @@
-from rest_framework.serializers import HyperlinkedModelSerializer
-from rest_framework_nested.serializers import NestedHyperlinkedModelSerializer
-from rest_framework.serializers import ModelSerializer, ValidationError, SerializerMethodField, PrimaryKeyRelatedField
+from rest_framework.serializers import ModelSerializer, ValidationError, PrimaryKeyRelatedField
 from django.db.models import Q
 from authentication.models import User
 
@@ -35,17 +33,12 @@ class ContributorSerializer(ModelSerializer):
         return data
 
 
-class CommentsListSerializer(NestedHyperlinkedModelSerializer):
-    parent_lookup_kwargs = {
-        "issue_pk": "issue__pk",
-        "project_pk": "issue__project__pk",
-    }
-    project = SerializerMethodField()
-    author_user_id = ProfileUserSerializer()
+class CommentsListSerializer(ModelSerializer):
+    author_info = ProfileUserSerializer(source="author_user_id", read_only=True)
 
     class Meta:
         model = Comments
-        fields = ["id", "author_user_id", "description", "issues_id"]
+        fields = ["id", "author_user_id", "author_info", "description", "issue_id"]
 
 
 class CommentsDetailSerializer(ModelSerializer):
