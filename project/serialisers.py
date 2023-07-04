@@ -1,4 +1,3 @@
-from re import T
 from rest_framework.serializers import HyperlinkedModelSerializer
 from rest_framework_nested.serializers import NestedHyperlinkedModelSerializer
 from rest_framework.serializers import ModelSerializer, ValidationError, SerializerMethodField, PrimaryKeyRelatedField
@@ -55,15 +54,32 @@ class CommentsDetailSerializer(ModelSerializer):
         fields = "__all__"
 
 
-class IssuesListSerializer(NestedHyperlinkedModelSerializer):
-    parent_lookup_kwargs = {
-        "project_pk": "project__pk",
-    }
-    author_user_id = ProfileUserSerializer()
+class IssuesListSerializer(ModelSerializer):
+    author_info = ProfileUserSerializer(source="author_user_id", read_only=True)
+    assignee_user_id = PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
+    assignee_user_info = ProfileUserSerializer(source="author_user_id", read_only=True)
+    project_id = PrimaryKeyRelatedField(queryset=Project.objects.all(), required=False)
 
     class Meta:
         model = Issues
-        fields = ["id", "title", "tag", "priority", "project_id", "author_user_id", "status"]
+        fields = [
+            "id",
+            "title",
+            "tag",
+            "priority",
+            "author_user_id",
+            "author_info",
+            "assignee_user_id",
+            "assignee_user_info",
+            "project_id",
+            "status",
+        ]
+
+    def validate_title(self, value):
+        # Nous vérifions que le probleme existe
+        if Issues.objects.filter(title=value).exists():
+            raise ValidationError("Un probleme similaire est deja enregistrer!")
+        return value
 
 
 class IssuesDetailSerializer(ModelSerializer):

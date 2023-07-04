@@ -58,7 +58,7 @@ class UserViews(ModelViewSet):
     """
 
     serializer_class = ContributorSerializer
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
         request.POST._mutable = True
@@ -80,18 +80,18 @@ class IssuesView(ModelViewSet):
 
     serializer_class = IssuesListSerializer
     detail_serializer_class = IssuesDetailSerializer
+    permission_classes = [IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
-        project_id = self.kwargs["project_pk"]
-        serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.project = project_id
-        # assingnee_user =
-        serializer.save(author_user_id=request.user)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        request.POST._mutable = True
+        request.data["author_user_id"] = str(self.request.user.pk)
+        request.data["project_id"] = self.kwargs["project_pk"]
+        request.POST._mutable = False
+        print(request.data)
+        return super(IssuesView, self).create(request, *args, **kwargs)
 
     def get_queryset(self):
-        return Issues.objects.filter(project=self.kwargs["project_pk"])
+        return Issues.objects.filter(project_id=self.kwargs["project_pk"])
 
     def get_serializer_class(self):
         if self.action == "retrieve":

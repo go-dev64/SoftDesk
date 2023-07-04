@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from authentication.models import User
 
 
 class Project(models.Model):
@@ -27,7 +28,7 @@ class Contributors(models.Model):
     COLLABORATEUR = "C"
     ROLE = [(REPONSABLE, "Responsable"), (COLLABORATEUR, "Collaborateur")]
 
-    user_id = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE)
     project_id = models.ForeignKey(Project, on_delete=models.CASCADE)
     permission = models.CharField(max_length=1)
     role = models.CharField(max_length=1, choices=ROLE, default=COLLABORATEUR)
@@ -54,15 +55,13 @@ class Issues(models.Model):
     tag = models.CharField(max_length=2, choices=BALISE, default=BUG)
     priority = models.CharField(max_length=2, choices=PRIORITY, default=ELEVEE)
 
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="issues")
+    project_id = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="issues")
 
     status = models.CharField(max_length=2, choices=STATUS, default=A_FAIRE)
     author_user_id = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="issues_written"
     )
-    assignee_user_id = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="assigned_issues"
-    )
+    assignee_user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name="assigned_issues")
     time_created = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:
