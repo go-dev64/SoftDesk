@@ -29,7 +29,7 @@ class Contributors(models.Model):
     ROLE = [(REPONSABLE, "Responsable"), (COLLABORATEUR, "Collaborateur")]
 
     user_id = models.ForeignKey(User, on_delete=models.CASCADE)
-    project_id = models.ForeignKey(Project, on_delete=models.CASCADE)
+    project_id = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="project_contributors")
     permission = models.CharField(max_length=1)
     role = models.CharField(max_length=1, choices=ROLE, default=COLLABORATEUR)
 

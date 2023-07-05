@@ -1,9 +1,11 @@
 from rest_framework.permissions import IsAuthenticated
+
 from rest_framework.viewsets import ModelViewSet
 from django.db.models import Q
 
 
 from .models import Comments, Contributors, Issues, Project
+from .permisssions import CommentPermission, IssuePermission, ProjectPermission
 from .serialisers import (
     CommentsDetailSerializer,
     CommentsListSerializer,
@@ -18,7 +20,7 @@ from .serialisers import (
 class ProjectViewset(ModelViewSet):
     serializer_class = ProjectListSerializer
     detail_serializer_class = ProjectDetailSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, ProjectPermission]
 
     def create(self, request, *args, **kwargs):
         request.POST._mutable = True
@@ -32,12 +34,8 @@ class ProjectViewset(ModelViewSet):
         Returns:
             _type_: _description_
         """
-        if self.request.user.is_superuser:
-            return Project.objects.all().order_by("title")
-        else:
-            return Project.objects.filter(
-                Q(author_user_id=self.request.user) | Q(contributors=self.request.user.pk)
-            ).order_by("title")
+
+        return Project.objects.all().order_by("title")
 
     def get_serializer_class(self):
         if self.action == "retrieve":
@@ -75,7 +73,7 @@ class IssuesView(ModelViewSet):
 
     serializer_class = IssuesListSerializer
     detail_serializer_class = IssuesDetailSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IssuePermission]
 
     def create(self, request, *args, **kwargs):
         request.POST._mutable = True

@@ -97,7 +97,7 @@ class ProjectListSerializer(ModelSerializer):
 
 
 class ProjectDetailSerializer(ModelSerializer):
-    contributors = ContributorSerializer(source="contributors_set", many=True)
+    contributors = ContributorSerializer(source="project_contributors", many=True)
     author_info = ProfileUserSerializer(source="author_user_id", read_only=True)
     issues = IssuesListSerializer(many=True, read_only=True)
 
