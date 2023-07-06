@@ -69,7 +69,7 @@ class IssuesListSerializer(ModelSerializer):
         ]
 
     def validate_title(self, value):
-        # Nous vérifions que le probleme existe
+        # Nous vérifions si le probleme existe
         if Issues.objects.filter(title=value).exists():
             raise ValidationError("Un probleme similaire est deja enregistrer!")
         return value

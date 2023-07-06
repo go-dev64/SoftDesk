@@ -101,7 +101,7 @@ class CommentsViews(ModelViewSet):
 
     serializer_class = CommentsListSerializer
     detail_serializer_class = CommentsDetailSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, CommentPermission]
 
     def create(self, request, *args, **kwargs):
         request.POST._mutable = True
