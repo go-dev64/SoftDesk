@@ -40,7 +40,7 @@ class ContributorSerializer(ModelSerializer):
         ]
 
     def validate(self, data):
-        # Verification si le collaborateur est deja inscrit au projet.
+        # Check if new collaborator already exist.
         if Contributors.objects.filter(Q(project_id=data["project_id"]) & Q(user_id=data["user_id"])).exists():
             raise ValidationError("Collaborator already exits in project")
         return data
@@ -100,7 +100,7 @@ class IssuesListSerializer(ModelSerializer):
         ]
 
     def validate_title(self, value):
-        # Nous vérifions si le probleme existe
+        # Check if Issue already exist.
         if Issues.objects.filter(title=value).exists():
             raise ValidationError("Issue already exits in project!")
         return value
@@ -133,7 +133,7 @@ class ProjectListSerializer(ModelSerializer):
         fields = ["id", "title", "type", "author_user_id", "author_info", "time_created"]
 
     def validate_title(self, value):
-        # Nous vérifions que la projet existe
+        # Check if project already exist.
         if Project.objects.filter(title=value).exists():
             raise ValidationError("Project already exists")
         return value
