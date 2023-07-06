@@ -8,7 +8,6 @@ class Project(models.Model):
     FRONTEND = "F"
     IOS = "I"
     ANDROID = "A"
-
     TYPE = [(BACKEND, "Back-end"), (FRONTEND, "Front-end"), (IOS, "IOS"), (ANDROID, "Android")]
 
     title = models.CharField(max_length=128)
@@ -54,9 +53,7 @@ class Issues(models.Model):
     description = models.CharField(max_length=2048)
     tag = models.CharField(max_length=2, choices=BALISE, default=BUG)
     priority = models.CharField(max_length=2, choices=PRIORITY, default=ELEVEE)
-
     project_id = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="issues")
-
     status = models.CharField(max_length=2, choices=STATUS, default=A_FAIRE)
     author_user_id = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="issues_written"
