@@ -1,9 +1,10 @@
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import ValidationError
 
 from rest_framework.viewsets import ModelViewSet
 from django.db.models import Q
 
-
+from authentication.models import User
 from .models import Comments, Contributors, Issues, Project
 from .permisssions import CollaboratorPermission, CommentPermission, IssuePermission, ProjectPermission
 from .serialisers import (
@@ -20,10 +21,10 @@ from .serialisers import (
 class MultipleSerializerMixin:
     detail_serializer_class = None
 
-    def get_serrilizer_class(self):
+    def get_serializer_class(self):
         if self.action == "retrieve" and self.detail_serializer_class is not None:
             return self.detail_serializer_class
-        return super().get_serilizer_class
+        return super().get_serializer_class()
 
 
 class ProjectViewset(MultipleSerializerMixin, ModelViewSet):
@@ -74,11 +75,21 @@ class UserViews(ModelViewSet):
     permission_classes = [IsAuthenticated, CollaboratorPermission]
 
     def create(self, request, *args, **kwargs):
-        # Modify the request.data so that the project_id is automatically defined.
-        request.POST._mutable = True
-        request.data["project_id"] = self.kwargs["project_pk"]
-        request.POST._mutable = False
-        return super(UserViews, self).create(request, *args, **kwargs)
+        # check if user exits and if is already exist in project contributor.
+        try:
+            User.objects.get(id=request.data["user_id"])
+            contributors = Contributors.objects.filter(
+                project_id=self.kwargs["project_pk"], user_id=request.data["user_id"]
+            )
+            if contributors.exists():
+                raise ValidationError("Collaborator already exists in project.")
+            raise ValidationError("User assignee does not exist")
+        else:
+            # Modify the request.data so that the project_id is automatically defined.
+            request.POST._mutable = True
+            request.data["project_id"] = self.kwargs["project_pk"]
+            request.POST._mutable = False
+            return super(UserViews, self).create(request, *args, **kwargs)
 
     def get_queryset(self):
         # return all contributor sorted by id.
@@ -103,13 +114,23 @@ class IssuesView(MultipleSerializerMixin, ModelViewSet):
     permission_classes = [IsAuthenticated, IssuePermission]
 
     def create(self, request, *args, **kwargs):
-        # Modify the request.data so that the project_id and author_user_id are automatically defined.
-        request.POST._mutable = True
-        request.data["author_user_id"] = str(self.request.user.pk)
-        request.data["project_id"] = self.kwargs["project_pk"]
-        request.POST._mutable = False
-        print(request.data)
-        return super(IssuesView, self).create(request, *args, **kwargs)
+        # check if user exits and if is project contributor.
+        try:
+            User.objects.get(id=request.data["assignee_user_id"])
+            Contributors.objects.get(
+                Q(project_id=self.kwargs["project_pk"]) and Q(user_id=request.data["assignee_user_id"])
+            )
+        except User.DoesNotExist:
+            raise ValidationError("User assignee does not exist")
+        except Contributors.DoesNotExist:
+            raise ValidationError("the assigned user must be a contributor to the project.")
+        else:
+            # Modify the request.data so that the project_id and author_user_id are automatically defined.
+            request.POST._mutable = True
+            request.data["author_user_id"] = self.request.user.pk
+            request.data["project_id"] = self.kwargs["project_pk"]
+            request.POST._mutable = False
+            return super(IssuesView, self).create(request, *args, **kwargs)
 
     def get_queryset(self):
         # return all Issue sorted by title.

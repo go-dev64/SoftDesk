@@ -43,7 +43,7 @@ class ContributorSerializer(ModelSerializer):
     def validate(self, data):
         # check if new collaborator exist.
         try:
-            User.objects.get(id=data["user_id"])
+            User.objects.get(id=data["user_id"].id)
         except User.DoesNotExist:
             raise ValidationError("User does not exist")
         else:
@@ -111,15 +111,6 @@ class IssuesListSerializer(ModelSerializer):
         if Issues.objects.filter(title=value).exists():
             raise ValidationError("Issue already exits in project!")
         return value
-
-    def validate(self, data):
-        # Check if user assignee exist.
-        try:
-            User.objects.get(id=data["assignee_user_id"])
-        except User.DoesNotExist:
-            raise ValidationError("User assignee does not exist")
-        else:
-            return data
 
 
 class IssuesDetailSerializer(ModelSerializer):
