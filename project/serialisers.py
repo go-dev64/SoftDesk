@@ -1,5 +1,6 @@
 from rest_framework.serializers import ModelSerializer, ValidationError, PrimaryKeyRelatedField
 from django.db.models import Q
+from django.shortcuts import get_object_or_404
 from authentication.models import User
 
 from .models import Comments, Contributors, Issues, Project
@@ -40,10 +41,16 @@ class ContributorSerializer(ModelSerializer):
         ]
 
     def validate(self, data):
-        # Check if new collaborator already exist.
-        if Contributors.objects.filter(Q(project_id=data["project_id"]) & Q(user_id=data["user_id"])).exists():
-            raise ValidationError("Collaborator already exits in project")
-        return data
+        # check if new collaborator exist.
+        try:
+            User.objects.get(id=data["user_id"])
+        except User.DoesNotExist:
+            raise ValidationError("User does not exist")
+        else:
+            # Check if new collaborator already exist.
+            if Contributors.objects.filter(Q(project_id=data["project_id"]) & Q(user_id=data["user_id"])).exists():
+                raise ValidationError("Collaborator already exits in project")
+            return data
 
 
 class CommentsListSerializer(ModelSerializer):
@@ -104,6 +111,15 @@ class IssuesListSerializer(ModelSerializer):
         if Issues.objects.filter(title=value).exists():
             raise ValidationError("Issue already exits in project!")
         return value
+
+    def validate(self, data):
+        # Check if user assignee exist.
+        try:
+            User.objects.get(id=data["assignee_user_id"])
+        except User.DoesNotExist:
+            raise ValidationError("User assignee does not exist")
+        else:
+            return data
 
 
 class IssuesDetailSerializer(ModelSerializer):

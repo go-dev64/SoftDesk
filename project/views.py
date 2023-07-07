@@ -112,7 +112,7 @@ class IssuesView(MultipleSerializerMixin, ModelViewSet):
         return super(IssuesView, self).create(request, *args, **kwargs)
 
     def get_queryset(self):
-        # return all Issue sorted by title
+        # return all Issue sorted by title.
         return Issues.objects.filter(project_id=self.kwargs["project_pk"]).order_by("title")
 
 
