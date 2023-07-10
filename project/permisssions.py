@@ -17,8 +17,8 @@ class IsCollaborator(BasePermission):
     # define if user connected is a project collaborators
 
     def is_collaborator(self, request, obj):
-        collaborators = Contributors.objects.filter(project_id=obj)
-        if request.user in collaborators:
+        collaborators = Contributors.objects.filter(project_id=obj, user_id=request.user.id)
+        if collaborators.exists():
             return True
 
 
@@ -32,8 +32,6 @@ class ProjectPermission(IsAuthor, IsCollaborator):
     def has_permission(self, request, view):
         if request.user.is_superuser:
             return True
-        if request.user.is_authenticated:
-            return True
 
     def has_object_permission(self, request, view, obj):
         if request.user.is_superuser:
@@ -45,7 +43,7 @@ class ProjectPermission(IsAuthor, IsCollaborator):
         return False
 
 
-class CollaboratorPermission(IsAuthor):
+class ContributorPermission(IsAuthor, IsCollaborator):
     """Define permissions for project contributors.
     Only Author and collabarator of project can see collaborators of project.
     Only Author can to add and deleting a collaborator.
@@ -79,6 +77,7 @@ class IssuePermission(IsAuthor, IsCollaborator):
 
     def has_permission(self, request, view):
         project = Project.objects.get(id=view.kwargs["project_pk"])
+        print(request.method)
         if request.user.is_superuser:
             return True
         if self.is_author(request=request, obj=project):
@@ -92,7 +91,7 @@ class IssuePermission(IsAuthor, IsCollaborator):
         if self.is_author(request=request, obj=obj):
             return True
         if request.method in SAFE_METHODS and self.is_collaborator(request=request, obj=obj.project_id):
-            True
+            return True
 
 
 class CommentPermission(IsAuthor, IsCollaborator):

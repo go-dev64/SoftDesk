@@ -6,7 +6,7 @@ from django.db.models import Q
 
 from authentication.models import User
 from .models import Comments, Contributors, Issues, Project
-from .permisssions import CollaboratorPermission, CommentPermission, IssuePermission, ProjectPermission
+from .permisssions import ContributorPermission, CommentPermission, IssuePermission, ProjectPermission
 from .serialisers import (
     CommentsDetailSerializer,
     CommentsListSerializer,
@@ -19,12 +19,26 @@ from .serialisers import (
 
 
 class MultipleSerializerMixin:
+    """_summary_
+
+    Returns:
+        _type_: get_serializer_class()
+    """
+
     detail_serializer_class = None
 
     def get_serializer_class(self):
         if self.action == "retrieve" and self.detail_serializer_class is not None:
             return self.detail_serializer_class
         return super().get_serializer_class()
+
+    def _check_user_exits(self, request, *args, **kwargs):
+        user = User.objects.get(id=request.user.pk)
+        return user
+
+    def _check_user_is_project_contributor(self, request, *args, **kwargs):
+        contributors = Contributors.objects.filter(project_id=self.kwargs["project_pk"], user_id=request.user.pk)
+        return contributors
 
 
 class ProjectViewset(MultipleSerializerMixin, ModelViewSet):
@@ -62,7 +76,7 @@ class ProjectViewset(MultipleSerializerMixin, ModelViewSet):
         return Project.objects.all().order_by("title")
 
 
-class UserViews(ModelViewSet):
+class UserViews(MultipleSerializerMixin, ModelViewSet):
     """Management view of Contributors of project.
     The project to which the user is added is automatically filled in.
 
@@ -72,18 +86,29 @@ class UserViews(ModelViewSet):
     """
 
     serializer_class = ContributorSerializer
-    permission_classes = [IsAuthenticated, CollaboratorPermission]
+    permission_classes = [IsAuthenticated, ContributorPermission]
 
     def create(self, request, *args, **kwargs):
         # check if user exits and if is already exist in project contributor.
-        try:
+        """try:
             User.objects.get(id=request.data["user_id"])
             contributors = Contributors.objects.filter(
                 project_id=self.kwargs["project_pk"], user_id=request.data["user_id"]
             )
             if contributors.exists():
                 raise ValidationError("Collaborator already exists in project.")
-            raise ValidationError("User assignee does not exist")
+        except User.DoesNotExist:
+            raise ValidationError("User assignee does not exist")"""
+
+        try:
+            self._check_user_exits(request=request)
+            contributors = self._check_user_is_project_contributor(request=request)
+            if contributors.exists():
+                raise ValidationError("Collaborator already exists in project.")
+
+        except User.DoesNotExist:
+            raise ValidationError("User does not exist")
+
         else:
             # Modify the request.data so that the project_id is automatically defined.
             request.POST._mutable = True
@@ -115,7 +140,7 @@ class IssuesView(MultipleSerializerMixin, ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         # check if user exits and if is project contributor.
-        try:
+        """try:
             User.objects.get(id=request.data["assignee_user_id"])
             Contributors.objects.get(
                 Q(project_id=self.kwargs["project_pk"]) and Q(user_id=request.data["assignee_user_id"])
@@ -123,7 +148,17 @@ class IssuesView(MultipleSerializerMixin, ModelViewSet):
         except User.DoesNotExist:
             raise ValidationError("User assignee does not exist")
         except Contributors.DoesNotExist:
+            raise ValidationError("the assigned user must be a contributor to the project.")"""
+        try:
+            self._check_user_exits(request=request)
+            self._check_user_is_project_contributor(request=request)
+
+        except User.DoesNotExist:
+            raise ValidationError("User assignee does not exist")
+
+        except Contributors.DoesNotExist:
             raise ValidationError("the assigned user must be a contributor to the project.")
+
         else:
             # Modify the request.data so that the project_id and author_user_id are automatically defined.
             request.POST._mutable = True
