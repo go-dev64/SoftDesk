@@ -2,8 +2,6 @@ from rest_framework.permissions import BasePermission, SAFE_METHODS
 
 from project.models import Contributors, Project
 
-EDIT_METHODES = ("DELETE", "PACTH")
-
 
 class IsAuthor(BasePermission):
     # Define if user connected is author of object
@@ -38,7 +36,7 @@ class ProjectPermission(IsAuthor, IsCollaborator):
             return True
         if self.is_author(request=request, obj=obj):
             return True
-        if request.method not in EDIT_METHODES and self.is_collaborator(request=request, obj=obj):
+        if request.method in SAFE_METHODS and self.is_collaborator(request=request, obj=obj):
             return True
         return False
 

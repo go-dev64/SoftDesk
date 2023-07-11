@@ -19,12 +19,6 @@ from .serialisers import (
 
 
 class MultipleSerializerMixin:
-    """_summary_
-
-    Returns:
-        _type_: get_serializer_class()
-    """
-
     detail_serializer_class = None
 
     def get_serializer_class(self):
@@ -58,14 +52,8 @@ class ProjectViewset(MultipleSerializerMixin, ModelViewSet):
     permission_classes = [IsAuthenticated, ProjectPermission]
 
     def create(self, request, *args, **kwargs):
-        """Modify the request.data so that the author is automatically defined.
+        # Modify the request.data so that the author is automatically defined.
 
-        Args:
-            request (_type_): data of new project
-
-        Returns:
-            _type_: _description_
-        """
         request.POST._mutable = True
         request.data["author_user_id"] = self.request.user.id
         request.POST._mutable = False
@@ -90,16 +78,6 @@ class UserViews(MultipleSerializerMixin, ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         # check if user exits and if is already exist in project contributor.
-        """try:
-            User.objects.get(id=request.data["user_id"])
-            contributors = Contributors.objects.filter(
-                project_id=self.kwargs["project_pk"], user_id=request.data["user_id"]
-            )
-            if contributors.exists():
-                raise ValidationError("Collaborator already exists in project.")
-        except User.DoesNotExist:
-            raise ValidationError("User assignee does not exist")"""
-
         try:
             self._check_user_exits(request=request)
             contributors = self._check_user_is_project_contributor(request=request)
@@ -140,15 +118,6 @@ class IssuesView(MultipleSerializerMixin, ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         # check if user exits and if is project contributor.
-        """try:
-            User.objects.get(id=request.data["assignee_user_id"])
-            Contributors.objects.get(
-                Q(project_id=self.kwargs["project_pk"]) and Q(user_id=request.data["assignee_user_id"])
-            )
-        except User.DoesNotExist:
-            raise ValidationError("User assignee does not exist")
-        except Contributors.DoesNotExist:
-            raise ValidationError("the assigned user must be a contributor to the project.")"""
         try:
             self._check_user_exits(request=request)
             self._check_user_is_project_contributor(request=request)
