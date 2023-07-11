@@ -28,10 +28,12 @@ class MultipleSerializerMixin:
 
     def _check_user_exits(self, request, *args, **kwargs):
         user = User.objects.get(id=request.user.pk)
+
         return user
 
-    def _check_user_is_project_contributor(self, request, *args, **kwargs):
+    def _check_user_is_project_contributor(self, request, obj, *args, **kwargs):
         contributors = Contributors.objects.filter(project_id=self.kwargs["project_pk"], user_id=request.user.pk)
+        self.check_object_permisssions(self, request, obj)
         return contributors
 
 

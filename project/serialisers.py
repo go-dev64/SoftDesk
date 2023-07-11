@@ -70,7 +70,7 @@ class CommentsListSerializer(ModelSerializer):
 class CommentsDetailSerializer(ModelSerializer):
     class Meta:
         model = Comments
-        fields = "__all__"
+        fields = ["id", "author_user_id", "author_info", "description", "issue_id"]
 
 
 class IssuesListSerializer(ModelSerializer):
