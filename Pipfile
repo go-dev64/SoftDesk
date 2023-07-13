@@ -11,6 +11,7 @@ markdown = "*"
 django-filter = "*"
 drf-nested-routers = "*"
 django-environ = "*"
+flake8 = "*"
 
 [dev-packages]
 

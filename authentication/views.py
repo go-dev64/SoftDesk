@@ -1,5 +1,4 @@
 from rest_framework.viewsets import ViewSet
-from .serializers import UserSerializer
 from rest_framework.response import Response
 
 from .serializers import UserSerializer

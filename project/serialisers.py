@@ -1,6 +1,5 @@
 from rest_framework.serializers import ModelSerializer, ValidationError, PrimaryKeyRelatedField
 from django.db.models import Q
-from django.shortcuts import get_object_or_404
 from authentication.models import User
 
 from .models import Comments, Contributors, Issues, Project

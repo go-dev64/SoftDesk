@@ -2,7 +2,6 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import ValidationError
 
 from rest_framework.viewsets import ModelViewSet
-from django.db.models import Q
 
 from authentication.models import User
 from .models import Comments, Contributors, Issues, Project
