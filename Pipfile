@@ -10,6 +10,7 @@ djangorestframework-simplejwt = "*"
 markdown = "*"
 django-filter = "*"
 drf-nested-routers = "*"
+django-environ = "*"
 
 [dev-packages]
 
