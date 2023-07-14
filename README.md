@@ -13,6 +13,10 @@ SoftDesk a mis en place une nouvelle équipe chargée de ce projet, et vous avez
 
 </center>
 
+
+
+
+
 # Projet : Application Web SoftDesk
 1. [Général / Présentation](#Général)
 2. [Technologies](#technologies)
@@ -23,22 +27,30 @@ SoftDesk a mis en place une nouvelle équipe chargée de ce projet, et vous avez
 
 ## <a id = Général>Général / Présentation</a>
 ***
-Cette application a pour but le suivides problèmes pour les trois plateformes (site web, app Android et IOS).
+Cette application a pour but le suivi des problèmes pour les trois plateformes (site web, app Android et IOS).
 
 L'application permet essentiellement aux utilsateurs de créer des projets, d'ajouter des utilisateurs à des porjets spécifiques, de créer des problèmes au sein des projets et d'attribuer des libellés à ces problèmes en fonction de leurs priorités, de balises/Tags, etc.
 
-Les principales fonctionnalités de l'application sont données dans la documentation Postman ci dessous:
+Les principales fonctionnalités de l'application sont données dans la documentation Postman ci-dessous:
 
 https://documenter.getpostman.com/view/25793951/2s946bDFFv
 
 
 ## <a id = technologies>Technologies</a>
 ***
+
+![Django](https://img.shields.io/badge/django-%23092E20.svg?style=for-the-badge&logo=django&logoColor=white)  ![DjangoREST](https://img.shields.io/badge/DJANGO-REST-ff1709?style=for-the-badge&logo=django&logoColor=white&color=ff1709&labelColor=gray)  ![Python](https://img.shields.io/badge/python_3.10-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)     ![SQLite](https://img.shields.io/badge/sqlite-%2307405e.svg?style=for-the-badge&logo=sqlite&logoColor=white)
+
 L'application est developpée sous le framework Django et Django restframework.
 
 Elle utilse les languages suivant:
+
+
+
 * [Python](https://www.python.org/downloads/release/python-31012/) : Version 3.10
-* Type Base de donnée : SQLite
+* Type Base de donnée : Sqlite
+
+
 
 ## <a id = installation>Installation</a>
 ***
