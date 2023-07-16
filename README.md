@@ -113,6 +113,12 @@ Taper dans votre terminal les commandes suivantes :
 
 Cette commande permet l'installation de tous les packages nécessaire au fonctionnement de l'application.
 
+### **_Variable d'environnement_**
+
+Ce projet utilise des variables d'environnement afin de stocker notamment les données sensible tels que la secret key django.
+
+Vous trouverez dans le dossier _SoftDesk/config/.env.example_ un exemple de configuration de variables d'environnement utilisée pour ce projet.
+
 
 ## <a id= fonctionnement>Fonctionnement</a>
 
