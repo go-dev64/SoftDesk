@@ -25,14 +25,12 @@ class MultipleSerializerMixin:
             return self.detail_serializer_class
         return super().get_serializer_class()
 
-    def _check_user_exits(self, request, *args, **kwargs):
-        user = User.objects.get(id=request.user.pk)
-
+    def _check_user_exits(self, user_id, *args, **kwargs):
+        user = User.objects.get(id=user_id)
         return user
 
-    def _check_user_is_project_contributor(self, request, obj, *args, **kwargs):
-        contributors = Contributors.objects.filter(project_id=self.kwargs["project_pk"], user_id=request.user.pk)
-        self.check_object_permisssions(self, request, obj)
+    def _check_user_is_project_contributor(self, user_id, *args, **kwargs):
+        contributors = Contributors.objects.filter(project_id=self.kwargs["project_pk"], user_id=user_id)
         return contributors
 
 
@@ -78,10 +76,10 @@ class UserViews(MultipleSerializerMixin, ModelViewSet):
     permission_classes = [IsAuthenticated, ContributorPermission]
 
     def create(self, request, *args, **kwargs):
-        # check if user exits and if is already exist in project contributor.
+        # check if user added exits and if is already exist in project contributor.
         try:
-            self._check_user_exits(request=request)
-            contributors = self._check_user_is_project_contributor(request=request)
+            self._check_user_exits(user_id=request.data["user_id"])
+            contributors = self._check_user_is_project_contributor(user_id=request.data["user_id"])
             if contributors.exists():
                 raise ValidationError("Collaborator already exists in project.")
 
@@ -120,14 +118,13 @@ class IssuesView(MultipleSerializerMixin, ModelViewSet):
     def create(self, request, *args, **kwargs):
         # check if user exits and if is project contributor.
         try:
-            self._check_user_exits(request=request)
-            self._check_user_is_project_contributor(request=request)
+            self._check_user_exits(user_id=request.data["assignee_user_id"])
+            contributors = self._check_user_is_project_contributor(user_id=request.data["assignee_user_id"])
+            if not contributors.exists():
+                raise ValidationError("Collaborator no exists in project.")
 
         except User.DoesNotExist:
             raise ValidationError("User assignee does not exist")
-
-        except Contributors.DoesNotExist:
-            raise ValidationError("the assigned user must be a contributor to the project.")
 
         else:
             # Modify the request.data so that the project_id and author_user_id are automatically defined.

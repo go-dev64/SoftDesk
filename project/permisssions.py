@@ -30,6 +30,8 @@ class ProjectPermission(IsAuthor, IsCollaborator):
     def has_permission(self, request, view):
         if request.user.is_superuser:
             return True
+        if request.user.is_authenticated:
+            return True
 
     def has_object_permission(self, request, view, obj):
         if request.user.is_superuser:
@@ -54,7 +56,7 @@ class ContributorPermission(IsAuthor, IsCollaborator):
             return True
         if self.is_author(request=request, obj=project):
             return True
-        if request.method in SAFE_METHODS and self.is_collaborator(request=request, obj=project.id):
+        if request.method in SAFE_METHODS and self.is_collaborator(request=request, obj=project.pk):
             return True
 
     def has_object_permission(self, request, view, obj):
@@ -62,7 +64,7 @@ class ContributorPermission(IsAuthor, IsCollaborator):
             return True
         if self.is_author(request=request, obj=obj):
             return True
-        if request.method in SAFE_METHODS and self.is_collaborator(request=request, obj=obj.id):
+        if request.method in SAFE_METHODS and self.is_collaborator(request=request, obj=obj.pk):
             return True
 
 
@@ -80,7 +82,7 @@ class IssuePermission(IsAuthor, IsCollaborator):
             return True
         if self.is_author(request=request, obj=project):
             return True
-        if self.is_collaborator(request=request, obj=project.id):
+        if self.is_collaborator(request=request, obj=project.pk):
             return True
 
     def has_object_permission(self, request, view, obj):
@@ -105,7 +107,7 @@ class CommentPermission(IsAuthor, IsCollaborator):
             return True
         if self.is_author(request=request, obj=project):
             return True
-        if self.is_collaborator(request=request, obj=project.id):
+        if self.is_collaborator(request=request, obj=project.pk):
             return True
 
     def has_object_permission(self, request, view, obj):

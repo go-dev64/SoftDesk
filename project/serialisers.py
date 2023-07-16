@@ -15,14 +15,6 @@ class ProfileUserSerializer(ModelSerializer):
 class ContributorSerializer(ModelSerializer):
     """Serilizer for contibutor project.
     Add a embedded serializer (ProfileUserSerializer), read only, for display user frist name and last_name.
-    Args:
-        ModelSerializer (_type_): _description_
-
-    Raises:
-        ValidationError: "Collaborator already exits in project"
-
-    Returns:
-        _type_: _description_
     """
 
     user_info = ProfileUserSerializer(source="user_id", read_only=True)
@@ -39,24 +31,10 @@ class ContributorSerializer(ModelSerializer):
             "role",
         ]
 
-    def validate(self, data):
-        # check if new collaborator exist.
-        try:
-            User.objects.get(id=data["user_id"].id)
-        except User.DoesNotExist:
-            raise ValidationError("User does not exist")
-        else:
-            # Check if new collaborator already exist.
-            if Contributors.objects.filter(Q(project_id=data["project_id"]) & Q(user_id=data["user_id"])).exists():
-                raise ValidationError("Collaborator already exits in project")
-            return data
-
 
 class CommentsListSerializer(ModelSerializer):
     """Serializer for list of comment of issue of project.
     Add a embedded serializer (ProfileUserSerializer), read only, for display user frist name and last_name.
-    Args:
-        ModelSerializer (_type_): _description_
     """
 
     author_info = ProfileUserSerializer(source="author_user_id", read_only=True)
@@ -75,19 +53,10 @@ class CommentsDetailSerializer(ModelSerializer):
 class IssuesListSerializer(ModelSerializer):
     """Serializer for list of Issues.
     Add a embedded serializer (ProfileUserSerializer), read only, for display author and assignee_user frist name and last_name.
-    Args:
-        ModelSerializer (_type_): _description_
-
-    Raises:
-        ValidationError: Issue already exits in project
-
-    Returns:
-        _type_: _description_
     """
 
     author_info = ProfileUserSerializer(source="author_user_id", read_only=True)
-    assignee_user_id = PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
-    assignee_user_info = ProfileUserSerializer(source="author_user_id", read_only=True)
+    assignee_user_info = ProfileUserSerializer(source="assignee_user_id", read_only=True)
     project_id = PrimaryKeyRelatedField(queryset=Project.objects.all(), required=False)
 
     class Meta:
@@ -121,14 +90,6 @@ class IssuesDetailSerializer(ModelSerializer):
 class ProjectListSerializer(ModelSerializer):
     """Serializer for project list.
     Add a embedded serializer (ProfileUserSerializer), read only, for display author frist name and last_name.
-    Args:
-        ModelSerializer (_type_): _description_
-
-    Raises:
-        ValidationError: _description_
-
-    Returns:
-        _type_: _description_
     """
 
     author_user_id = PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
@@ -144,11 +105,15 @@ class ProjectListSerializer(ModelSerializer):
             raise ValidationError("Project already exists")
         return value
 
+    def create(self, validated_data):
+        project = Project.objects.create(**validated_data)
+        Contributors.objects.create(user_id=project.author_user_id, project_id=project, role="R", permission="t")
+        return project
+
 
 class ProjectDetailSerializer(ModelSerializer):
     contributors = ContributorSerializer(source="project_contributors", many=True)
     author_info = ProfileUserSerializer(source="author_user_id", read_only=True)
-    # issues = IssuesListSerializer(many=True, read_only=True)
 
     class Meta:
         model = Project
