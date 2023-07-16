@@ -1,5 +1,4 @@
 from rest_framework.serializers import ModelSerializer, ValidationError, PrimaryKeyRelatedField
-from django.db.models import Q
 from authentication.models import User
 
 from .models import Comments, Contributors, Issues, Project
@@ -52,7 +51,8 @@ class CommentsDetailSerializer(ModelSerializer):
 
 class IssuesListSerializer(ModelSerializer):
     """Serializer for list of Issues.
-    Add a embedded serializer (ProfileUserSerializer), read only, for display author and assignee_user frist name and last_name.
+    Add a embedded serializer (ProfileUserSerializer),
+    read only, for display author and assignee_user frist name and last_name.
     """
 
     author_info = ProfileUserSerializer(source="author_user_id", read_only=True)
