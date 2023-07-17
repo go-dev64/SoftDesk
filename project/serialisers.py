@@ -44,6 +44,8 @@ class CommentsListSerializer(ModelSerializer):
 
 
 class CommentsDetailSerializer(ModelSerializer):
+    author_info = ProfileUserSerializer(source="author_user_id", read_only=True)
+
     class Meta:
         model = Comments
         fields = ["id", "author_user_id", "author_info", "description", "issue_id"]

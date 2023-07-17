@@ -116,7 +116,7 @@ class IssuesView(MultipleSerializerMixin, ModelViewSet):
     permission_classes = [IsAuthenticated, IssuePermission]
 
     def create(self, request, *args, **kwargs):
-        # check if user exits and if is project contributor.
+        # check if user assignee exits and if is project contributor.
         try:
             self._check_user_exits(user_id=request.data["assignee_user_id"])
             contributors = self._check_user_is_project_contributor(user_id=request.data["assignee_user_id"])
@@ -133,6 +133,19 @@ class IssuesView(MultipleSerializerMixin, ModelViewSet):
             request.data["project_id"] = self.kwargs["project_pk"]
             request.POST._mutable = False
             return super(IssuesView, self).create(request, *args, **kwargs)
+
+    def update(self, request, *args, **kwargs):
+        # check if user assignee exits and if is project contributor.
+        try:
+            self._check_user_exits(user_id=request.data["assignee_user_id"])
+            contributors = self._check_user_is_project_contributor(user_id=request.data["assignee_user_id"])
+            if not contributors.exists():
+                raise ValidationError("Collaborator no exists in project.")
+
+        except User.DoesNotExist:
+            raise ValidationError("User assignee does not exist")
+
+        return super(IssuesView, self).update(request, *args, **kwargs)
 
     def get_queryset(self):
         # return all Issue sorted by title.
