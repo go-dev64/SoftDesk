@@ -62,7 +62,7 @@ class ContributorPermission(IsAuthor, IsCollaborator):
     def has_object_permission(self, request, view, obj):
         if request.user.is_superuser:
             return True
-        if self.is_author(request=request, obj=obj):
+        if self.is_author(request=request, obj=obj.project_id):
             return True
         if request.method in SAFE_METHODS and self.is_collaborator(request=request, obj=obj.pk):
             return True
